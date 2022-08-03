@@ -1,3 +1,6 @@
+from collections import OrderedDict
+
+
 class MacOsJob:
     def __init__(self, os_version, is_build=False, is_test=False, extra_props=tuple()):
         # extra_props is tuple type, because mutable data structures for argument defaults
@@ -46,6 +49,21 @@ WORKFLOW_DATA = [
         }.items()),
     )
 ]
+
+
+def get_new_workflow_jobs():
+    return OrderedDict(
+        {
+            "macos-12-py3-x86-64-build": OrderedDict(
+                {
+                    "name": "macos-12-py3-x86-64",
+                    "build-environment": 'macos-12-py3-x86-64',
+                    "xcode-version": "13.3.1",
+                    "context": "org-member",
+                }
+            )
+        }
+    )
 
 
 def get_workflow_jobs():

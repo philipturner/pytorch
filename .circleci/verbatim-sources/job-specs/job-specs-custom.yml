@@ -95,6 +95,135 @@
           paths:
             - miniconda3
 
+  mac_build:
+    parameters:
+      build-environment:
+        type: string
+        description: Top-level label for what's being built/tested.
+      runner-type:
+        type: string
+        description: Name of the GitHub-managed runner type to use for the build.
+      build-generates-artifacts:
+        type: boolean
+        description: If set, upload generated build artifacts.
+      xcode-version:
+        type: string
+        default: ""
+        description: What xcode version to build with.
+      sync-tag:
+        type: string
+        default: ""
+        description: |
+          If this is set, our linter will use this to make sure that every other
+          job with the same `sync-tag` is identical.
+    macos:
+      xcode: < parameters.xcode-version >
+    environment:
+      BUILD_ENVIRONMENT: < parameters.build-environment >
+    steps:
+      - steps:
+        - checkout
+        - run_brew_for_macos_build
+
+        - run:
+            name: Install sccache (only for non-forked PRs, and pushes to trunk)
+            command: |
+              sudo curl --retry 3 https://s3.amazonaws.com/ossci-macos/sccache_v2.15 --output /usr/local/bin/sccache
+              sudo chmod +x /usr/local/bin/sccache
+              echo "export SCCACHE_BUCKET=ossci-compiler-cache-circleci-v2" >> "${BASH_ENV}"
+              echo "export SCCACHE_S3_KEY_PREFIX=${GITHUB_WORKFLOW}" >> "${BASH_ENV}"
+
+              set +x
+              echo "export AWS_ACCESS_KEY_ID=${CIRCLECI_AWS_ACCESS_KEY_FOR_SCCACHE_S3_BUCKET_V4}" >> "${BASH_ENV}"
+              echo "export AWS_SECRET_ACCESS_KEY=${CIRCLECI_AWS_SECRET_KEY_FOR_SCCACHE_S3_BUCKET_V4}" >> "${BASH_ENV}"
+              set -x
+
+        - run:
+            name: Get workflow job id
+            command: |
+              echo "export OUR_GITHUB_JOB_ID=${CIRCLE_WORKFLOW_JOB_ID}" >> "${BASH_ENV}"
+
+        - run:
+            name: Build
+            command: |
+              echo "export CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname "$(which conda)")/../"}" >> "${BASH_ENV}"
+              .jenkins/pytorch/macos-build.sh
+
+        - run:
+            name: Archive artifacts into zip
+            if: inputs.build-generates-artifacts
+            command: |
+              zip -1 -r artifacts.zip dist/ build/.ninja_log build/compile_commands.json .pytorch-test-times.json
+
+        - persist_to_workspace:
+          root: /Users/distiller/workspace/
+          paths:
+            - miniconda3
+
+  mac_test:
+    parameters:
+      build-environment:
+        type: string
+        description: Top-level label for what's being built/tested.
+      test-matrix:
+        type: string
+        description: JSON description of what test configs to run.
+      shard-number:
+        type: string
+      num-test-shards:
+        type: string
+    macos:
+    env:
+      GIT_DEFAULT_BRANCH: 'master'
+      BUILD_ENVIRONMENT: < parameters.build-environment >
+      TEST_CONFIG: 'default'
+      SHARD_NUMBER: < parameters.shard-number >
+      NUM_TEST_SHARDS: < parameters.num-test-shards >
+      PYTORCH_RETRY_TEST_CASES: 1
+      PYTORCH_OVERRIDE_FLAKY_SIGNAL: 1
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/workspace
+      - run_brew_for_macos_build
+      - run:
+          name: Test
+          no_output_timeout: "1h"
+          command: |
+            COMMIT_MESSAGES=$(git cherry -v "origin/${GIT_DEFAULT_BRANCH:-master}")
+
+            # # sanitize the input commit message and PR body here:
+            # #
+            # # trim all new lines from commit messages + PR_BODY to avoid issues with batch environment
+            # # variable copying. see https://github.com/pytorch/pytorch/pull/80043#issuecomment-1167796028
+            # COMMIT_MESSAGES="${COMMIT_MESSAGES//[$'\n\r']}"
+            # PR_BODY="${PR_BODY//[$'\n\r']}"
+
+            # # then trim all special characters like single and double quotes to avoid unescaped inputs to
+            # # wreak havoc internally
+            # export COMMIT_MESSAGES="${COMMIT_MESSAGES//[\'\"]}"
+            # export PR_BODY="${PR_BODY//[\'\"]}"
+
+            python3 -mpip install dist/*.whl
+            .jenkins/pytorch/macos-test.sh
+      - run:
+          name: Report results
+          no_output_timeout: "5m"
+          command: |
+            set -ex
+            source /Users/distiller/workspace/miniconda3/bin/activate
+            python3 -m pip install boto3==1.19.12
+
+            export JOB_BASE_NAME=$CIRCLE_JOB
+
+            # Using the same IAM user to write stats to our OSS bucket
+            export AWS_ACCESS_KEY_ID=${CIRCLECI_AWS_ACCESS_KEY_FOR_SCCACHE_S3_BUCKET_V4}
+            export AWS_SECRET_ACCESS_KEY=${CIRCLECI_AWS_SECRET_KEY_FOR_SCCACHE_S3_BUCKET_V4}
+            python -m tools.stats.print_test_stats --upload-to-s3 --compare-with-s3 test
+      - store_test_results:
+          path: test/test-reports
+
+
   pytorch_macos_10_13_py3_test:
     environment:
       BUILD_ENVIRONMENT: pytorch-macos-10.13-py3-test
