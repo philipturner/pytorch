@@ -608,6 +608,22 @@ jobs:
       - run:
           name: Build
           command: |
+            export PATH="/usr/local/bin:$PATH"
+            export WORKSPACE_DIR="${HOME}/workspace"
+            mkdir -p "${WORKSPACE_DIR}"
+
+            MINICONDA_URL="https://repo.anaconda.com/miniconda/Miniconda3-py37_4.8.3-MacOSX-x86_64.sh"
+
+            # If a local installation of conda doesn't exist, we download and install conda
+            if [ ! -d "${WORKSPACE_DIR}/miniconda3" ]; then
+              mkdir -p "${WORKSPACE_DIR}"
+              curl --retry 3 ${MINICONDA_URL} -o "${WORKSPACE_DIR}"/miniconda3.sh
+              bash "${WORKSPACE_DIR}"/miniconda3.sh -b -p "${WORKSPACE_DIR}"/miniconda3
+            fi
+            export PATH="${WORKSPACE_DIR}/miniconda3/bin:$PATH"
+            # shellcheck disable=SC1091
+            source "${WORKSPACE_DIR}"/miniconda3/bin/activate
+
             echo "export CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname "$(which conda)")/../"}" >> "${BASH_ENV}"
             .jenkins/pytorch/macos-build.sh
 
