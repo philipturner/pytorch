@@ -60,7 +60,6 @@ def get_new_workflow_jobs():
                     "name": "macos-12-py3-x86-64",
                     "build-environment": "macos-12-py3-x86-64",
                     "xcode-version": quote("13.3.1"),
-                    "context": "org-member",
                 }
             )
         }

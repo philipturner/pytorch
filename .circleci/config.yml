@@ -613,7 +613,6 @@ jobs:
 
       - run:
           name: Archive artifacts into zip
-          if: inputs.build-generates-artifacts
           command: |
             zip -1 -r artifacts.zip dist/ build/.ninja_log build/compile_commands.json .pytorch-test-times.json
 
@@ -1364,5 +1363,4 @@ workflows:
           name: macos-12-py3-x86-64
           build-environment: macos-12-py3-x86-64
           xcode-version: "13.3.1"
-          context: org-member
     when: << pipeline.parameters.run_build >>

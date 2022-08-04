@@ -138,7 +138,6 @@
 
       - run:
           name: Archive artifacts into zip
-          if: inputs.build-generates-artifacts
           command: |
             zip -1 -r artifacts.zip dist/ build/.ninja_log build/compile_commands.json .pytorch-test-times.json
 
