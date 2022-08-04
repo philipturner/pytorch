@@ -100,62 +100,49 @@
       build-environment:
         type: string
         description: Top-level label for what's being built/tested.
-      runner-type:
-        type: string
-        description: Name of the GitHub-managed runner type to use for the build.
-      build-generates-artifacts:
-        type: boolean
-        description: If set, upload generated build artifacts.
       xcode-version:
         type: string
-        default: ""
+        default: "13.3.1"
         description: What xcode version to build with.
-      sync-tag:
-        type: string
-        default: ""
-        description: |
-          If this is set, our linter will use this to make sure that every other
-          job with the same `sync-tag` is identical.
     macos:
-      xcode: < parameters.xcode-version >
+      xcode: << parameters.xcode-version >>
     environment:
-      BUILD_ENVIRONMENT: < parameters.build-environment >
+      BUILD_ENVIRONMENT: << parameters.build-environment >>
     steps:
-      - steps:
-        - checkout
-        - run_brew_for_macos_build
+      - checkout
+      - run_brew_for_macos_build
 
-        - run:
-            name: Install sccache (only for non-forked PRs, and pushes to trunk)
-            command: |
-              sudo curl --retry 3 https://s3.amazonaws.com/ossci-macos/sccache_v2.15 --output /usr/local/bin/sccache
-              sudo chmod +x /usr/local/bin/sccache
-              echo "export SCCACHE_BUCKET=ossci-compiler-cache-circleci-v2" >> "${BASH_ENV}"
-              echo "export SCCACHE_S3_KEY_PREFIX=${GITHUB_WORKFLOW}" >> "${BASH_ENV}"
+      - run:
+          name: Install sccache (only for non-forked PRs, and pushes to trunk)
+          command: |
+            sudo curl --retry 3 https://s3.amazonaws.com/ossci-macos/sccache_v2.15 --output /usr/local/bin/sccache
+            sudo chmod +x /usr/local/bin/sccache
+            echo "export SCCACHE_BUCKET=ossci-compiler-cache-circleci-v2" >> "${BASH_ENV}"
+            echo "export SCCACHE_S3_KEY_PREFIX=${GITHUB_WORKFLOW}" >> "${BASH_ENV}"
 
-              set +x
-              echo "export AWS_ACCESS_KEY_ID=${CIRCLECI_AWS_ACCESS_KEY_FOR_SCCACHE_S3_BUCKET_V4}" >> "${BASH_ENV}"
-              echo "export AWS_SECRET_ACCESS_KEY=${CIRCLECI_AWS_SECRET_KEY_FOR_SCCACHE_S3_BUCKET_V4}" >> "${BASH_ENV}"
-              set -x
+            set +x
+            echo "export AWS_ACCESS_KEY_ID=${CIRCLECI_AWS_ACCESS_KEY_FOR_SCCACHE_S3_BUCKET_V4}" >> "${BASH_ENV}"
+            echo "export AWS_SECRET_ACCESS_KEY=${CIRCLECI_AWS_SECRET_KEY_FOR_SCCACHE_S3_BUCKET_V4}" >> "${BASH_ENV}"
+            set -x
 
-        - run:
-            name: Get workflow job id
-            command: |
-              echo "export OUR_GITHUB_JOB_ID=${CIRCLE_WORKFLOW_JOB_ID}" >> "${BASH_ENV}"
+      - run:
+          name: Get workflow job id
+          command: |
+            echo "export OUR_GITHUB_JOB_ID=${CIRCLE_WORKFLOW_JOB_ID}" >> "${BASH_ENV}"
 
-        - run:
-            name: Build
-            command: |
-              echo "export CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname "$(which conda)")/../"}" >> "${BASH_ENV}"
-              .jenkins/pytorch/macos-build.sh
+      - run:
+          name: Build
+          command: |
+            echo "export CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname "$(which conda)")/../"}" >> "${BASH_ENV}"
+            .jenkins/pytorch/macos-build.sh
 
-        - run:
-            name: Archive artifacts into zip
-            if: inputs.build-generates-artifacts
-            command: |
-              zip -1 -r artifacts.zip dist/ build/.ninja_log build/compile_commands.json .pytorch-test-times.json
+      - run:
+          name: Archive artifacts into zip
+          if: inputs.build-generates-artifacts
+          command: |
+            zip -1 -r artifacts.zip dist/ build/.ninja_log build/compile_commands.json .pytorch-test-times.json
 
-        - persist_to_workspace:
+      - persist_to_workspace:
           root: /Users/distiller/workspace/
           paths:
             - miniconda3
@@ -172,13 +159,16 @@
         type: string
       num-test-shards:
         type: string
+      xcode-version:
+        type: string
     macos:
-    env:
+      xcode: << parameters.xcode-version >>
+    environment:
       GIT_DEFAULT_BRANCH: 'master'
-      BUILD_ENVIRONMENT: < parameters.build-environment >
+      BUILD_ENVIRONMENT: << parameters.build-environment >>
       TEST_CONFIG: 'default'
-      SHARD_NUMBER: < parameters.shard-number >
-      NUM_TEST_SHARDS: < parameters.num-test-shards >
+      SHARD_NUMBER: << parameters.shard-number >>
+      NUM_TEST_SHARDS: << parameters.num-test-shards >>
       PYTORCH_RETRY_TEST_CASES: 1
       PYTORCH_OVERRIDE_FLAKY_SIGNAL: 1
     steps:

@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from cimodel.lib.miniutils import quote
 
 
 class MacOsJob:
@@ -54,11 +55,11 @@ WORKFLOW_DATA = [
 def get_new_workflow_jobs():
     return OrderedDict(
         {
-            "macos-12-py3-x86-64-build": OrderedDict(
+            "mac_build": OrderedDict(
                 {
                     "name": "macos-12-py3-x86-64",
-                    "build-environment": 'macos-12-py3-x86-64',
-                    "xcode-version": "13.3.1",
+                    "build-environment": "macos-12-py3-x86-64",
+                    "xcode-version": quote("13.3.1"),
                     "context": "org-member",
                 }
             )
