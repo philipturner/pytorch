@@ -106,6 +106,7 @@
         description: What xcode version to build with.
     macos:
       xcode: << parameters.xcode-version >>
+    resource_class: large
     environment:
       BUILD_ENVIRONMENT: << parameters.build-environment >>
     steps:
