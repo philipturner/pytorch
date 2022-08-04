@@ -106,7 +106,7 @@
         description: What xcode version to build with.
     macos:
       xcode: << parameters.xcode-version >>
-    resource_class: large
+    resource_class: medium
     environment:
       BUILD_ENVIRONMENT: << parameters.build-environment >>
     steps:
@@ -168,9 +168,6 @@
       build-environment:
         type: string
         description: Top-level label for what's being built/tested.
-      test-matrix:
-        type: string
-        description: JSON description of what test configs to run.
       shard-number:
         type: string
       num-test-shards:
@@ -197,6 +194,22 @@
           no_output_timeout: "1h"
           command: |
             COMMIT_MESSAGES=$(git cherry -v "origin/${GIT_DEFAULT_BRANCH:-master}")
+
+            export PATH="/usr/local/bin:$PATH"
+            export WORKSPACE_DIR="${HOME}/workspace"
+            mkdir -p "${WORKSPACE_DIR}"
+
+            MINICONDA_URL="https://repo.anaconda.com/miniconda/Miniconda3-py37_4.8.3-MacOSX-x86_64.sh"
+
+            # If a local installation of conda doesn't exist, we download and install conda
+            if [ ! -d "${WORKSPACE_DIR}/miniconda3" ]; then
+              mkdir -p "${WORKSPACE_DIR}"
+              curl --retry 3 ${MINICONDA_URL} -o "${WORKSPACE_DIR}"/miniconda3.sh
+              bash "${WORKSPACE_DIR}"/miniconda3.sh -b -p "${WORKSPACE_DIR}"/miniconda3
+            fi
+            export PATH="${WORKSPACE_DIR}/miniconda3/bin:$PATH"
+            # shellcheck disable=SC1091
+            source "${WORKSPACE_DIR}"/miniconda3/bin/activate
 
             # # sanitize the input commit message and PR body here:
             # #

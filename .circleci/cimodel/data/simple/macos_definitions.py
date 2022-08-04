@@ -53,17 +53,29 @@ WORKFLOW_DATA = [
 
 
 def get_new_workflow_jobs():
-    return OrderedDict(
+    return [OrderedDict(
         {
             "mac_build": OrderedDict(
                 {
-                    "name": "macos-12-py3-x86-64",
+                    "name": "macos-12-py3-x86-64-build",
                     "build-environment": "macos-12-py3-x86-64",
                     "xcode-version": quote("13.3.1"),
                 }
-            )
-        }
-    )
+            )}),
+            OrderedDict(
+            {
+                "mac_test": OrderedDict(
+                    {
+                        "name": "macos-12-py3-x86-64-test",
+                        "build-environment": "macos-12-py3-x86-64",
+                        "xcode-version": quote("13.3.1"),
+                        "shard-number": quote("1"),
+                        "num-test-shards": quote("2"),
+                        "requires": ["macos-12-py3-x86-64-build"]
+                    }
+                )
+            })
+            ]
 
 
 def get_workflow_jobs():
