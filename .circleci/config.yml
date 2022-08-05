@@ -630,19 +630,20 @@ jobs:
             echo "export CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname "$(which conda)")/../"}" >> "${BASH_ENV}"
             .jenkins/pytorch/macos-build.sh
 
-            python3 -m pip install dist/*.whl
-
       - run:
           name: Archive artifacts into zip
           command: |
             zip -1 -r artifacts.zip dist/ build/.ninja_log build/compile_commands.json .pytorch-test-times.json
+            cp artifacts.zip /Users/distiller/workspace
 
       - persist_to_workspace:
           root: /Users/distiller/workspace/
           paths:
             - miniconda3
+            - artifacts.zip
+
       - store_artifacts:
-          path: /Users/distiller/project/dist
+          path: /Users/distiller/project/artifacts.zip
 
   mac_test:
     parameters:
@@ -675,6 +676,8 @@ jobs:
           no_output_timeout: "1h"
           command: |
             set -x
+            mv ~/workspace/artifacts.zip .
+            unzip artifacts.zip
 
             export IN_CI=1
 
@@ -708,6 +711,7 @@ jobs:
             # export COMMIT_MESSAGES="${COMMIT_MESSAGES//[\'\"]}"
             # export PR_BODY="${PR_BODY//[\'\"]}"
 
+            python3 -mpip install dist/*.whl
             .jenkins/pytorch/macos-test.sh
       - run:
           name: Report results
