@@ -223,7 +223,6 @@
             # export COMMIT_MESSAGES="${COMMIT_MESSAGES//[\'\"]}"
             # export PR_BODY="${PR_BODY//[\'\"]}"
 
-            python3 -mpip install dist/*.whl
             .jenkins/pytorch/macos-test.sh
       - run:
           name: Report results
