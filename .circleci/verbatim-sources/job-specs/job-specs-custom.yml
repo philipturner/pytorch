@@ -134,6 +134,8 @@
       - run:
           name: Build
           command: |
+            set -x
+
             export PATH="/usr/local/bin:$PATH"
             export WORKSPACE_DIR="${HOME}/workspace"
             mkdir -p "${WORKSPACE_DIR}"
@@ -162,6 +164,8 @@
           root: /Users/distiller/workspace/
           paths:
             - miniconda3
+      - store_artifacts:
+          path: /Users/distiller/project/dist
 
   mac_test:
     parameters:
@@ -193,6 +197,10 @@
           name: Test
           no_output_timeout: "1h"
           command: |
+            set -x
+
+            export IN_CI=1
+
             COMMIT_MESSAGES=$(git cherry -v "origin/${GIT_DEFAULT_BRANCH:-master}")
 
             export PATH="/usr/local/bin:$PATH"
@@ -258,6 +266,9 @@
           command: |
             set -e
             export JOB_BASE_NAME=$CIRCLE_JOB
+
+            export IMAGE_COMMIT_ID=$(git rev-parse HEAD)
+            export IMAGE_COMMIT_TAG=${BUILD_ENVIRONMENT}-${IMAGE_COMMIT_ID}
 
             chmod a+x .jenkins/pytorch/macos-test.sh
             unbuffer .jenkins/pytorch/macos-test.sh 2>&1 | ts
