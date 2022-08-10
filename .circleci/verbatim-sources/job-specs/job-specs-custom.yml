@@ -108,6 +108,9 @@
         type: boolean
         default: true
         description: if the build generates build artifacts
+      python-version:
+        type: string
+        default: "3.8"
     macos:
       xcode: << parameters.xcode-version >>
     resource_class: medium
@@ -118,7 +121,7 @@
       - run_brew_for_macos_build
 
       - run:
-          name: Install sccache (only for non-forked PRs, and pushes to trunk)
+          name: Install sccache
           command: |
             sudo curl --retry 3 https://s3.amazonaws.com/ossci-macos/sccache_v2.15 --output /usr/local/bin/sccache
             sudo chmod +x /usr/local/bin/sccache
@@ -146,8 +149,10 @@
             export PATH="/usr/local/bin:$PATH"
             export WORKSPACE_DIR="${HOME}/workspace"
             mkdir -p "${WORKSPACE_DIR}"
-
-            MINICONDA_URL="https://repo.anaconda.com/miniconda/Miniconda3-py37_4.8.3-MacOSX-x86_64.sh"
+            MINICONDA_URL="https://repo.anaconda.com/miniconda/Miniconda3-py38_4.12.0-MacOSX-x86_64.sh"
+            if [  << parameters.python-version >> == 3.9.12 ]; then
+              MINICONDA_URL="https://repo.anaconda.com/miniconda/Miniconda3-py39_4.12.0-MacOSX-x86_64.sh"
+            fi
 
             # If a local installation of conda doesn't exist, we download and install conda
             if [ ! -d "${WORKSPACE_DIR}/miniconda3" ]; then
@@ -191,12 +196,16 @@
         type: string
       xcode-version:
         type: string
+      test-config:
+        type: string
+        default: 'default'
+
     macos:
       xcode: << parameters.xcode-version >>
     environment:
       GIT_DEFAULT_BRANCH: 'master'
       BUILD_ENVIRONMENT: << parameters.build-environment >>
-      TEST_CONFIG: 'default'
+      TEST_CONFIG: << parameters.test-config >>
       SHARD_NUMBER: << parameters.shard-number >>
       NUM_TEST_SHARDS: << parameters.num-test-shards >>
       PYTORCH_RETRY_TEST_CASES: 1
@@ -226,14 +235,14 @@
             export WORKSPACE_DIR="${HOME}/workspace"
             mkdir -p "${WORKSPACE_DIR}"
 
-            MINICONDA_URL="https://repo.anaconda.com/miniconda/Miniconda3-py37_4.8.3-MacOSX-x86_64.sh"
+            # MINICONDA_URL="https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh"
 
-            # If a local installation of conda doesn't exist, we download and install conda
-            if [ ! -d "${WORKSPACE_DIR}/miniconda3" ]; then
-              mkdir -p "${WORKSPACE_DIR}"
-              curl --retry 3 ${MINICONDA_URL} -o "${WORKSPACE_DIR}"/miniconda3.sh
-              bash "${WORKSPACE_DIR}"/miniconda3.sh -b -p "${WORKSPACE_DIR}"/miniconda3
-            fi
+            # # If a local installation of conda doesn't exist, we download and install conda
+            # if [ ! -d "${WORKSPACE_DIR}/miniconda3" ]; then
+            #   mkdir -p "${WORKSPACE_DIR}"
+            #   curl --retry 3 ${MINICONDA_URL} -o "${WORKSPACE_DIR}"/miniconda3.sh
+            #   bash "${WORKSPACE_DIR}"/miniconda3.sh -b -p "${WORKSPACE_DIR}"/miniconda3
+            # fi
             export PATH="${WORKSPACE_DIR}/miniconda3/bin:$PATH"
             # shellcheck disable=SC1091
             source "${WORKSPACE_DIR}"/miniconda3/bin/activate
