@@ -623,12 +623,14 @@
             cd ${PROJ_ROOT}/ios/TestApp/benchmark
             mkdir -p ../models
             if [ ${USE_COREML_DELEGATE} == 1 ]; then
-              pip install coremltools==5.0b5
-              pip install six
+              pip install coremltools==5.0b5 protobuf==3.20.1
+              pip install six==1.16.0
               python coreml_backend.py
             else
-              python trace_model.py
+              cd "${PROJ_ROOT}"
+              python test/mobile/model_test/gen_test_model.py ios-test
             fi
+            cd "${PROJ_ROOT}/ios/TestApp/benchmark"
             if [ ${BUILD_LITE_INTERPRETER} == 1 ]; then
               echo "Setting up the TestApp for LiteInterpreter"
               ruby setup.rb --lite 1
@@ -636,10 +638,10 @@
               echo "Setting up the TestApp for Full JIT"
               ruby setup.rb
             fi
-            cd ${PROJ_ROOT}/ios/TestApp
-            instruments -s -devices
-            if [ ${BUILD_LITE_INTERPRETER} == 1 ]; then
-              if [ ${USE_COREML_DELEGATE} == 1 ]; then
+            cd "${PROJ_ROOT}/ios/TestApp"
+            # instruments -s -devices
+            if [ "${BUILD_LITE_INTERPRETER}" == 1 ]; then
+              if [ "${USE_COREML_DELEGATE}" == 1 ]; then
                 fastlane scan --only_testing TestAppTests/TestAppTests/testCoreML
               else
                 fastlane scan --only_testing TestAppTests/TestAppTests/testLiteInterpreter
