@@ -155,6 +155,7 @@ def get_new_workflow_jobs():
                         "ios_arch": "x86_64",
                         "ios_platform": "SIMULATOR",
                         "use_coreml": quote("1"),
+                        "context": "org-member",
                     }
                 )
             }
@@ -167,6 +168,7 @@ def get_new_workflow_jobs():
                         "build_environment": "ios-12-5-1-arm64",
                         "ios_arch": "arm64",
                         "ios_platform": "OS",
+                        "context": "org-member",
                     }
                 )
             }
@@ -180,6 +182,7 @@ def get_new_workflow_jobs():
                         "ios_arch": "arm64",
                         "ios_platform": "OS",
                         "use_coreml": quote("1"),
+                        "context": "org-member",
                     }
                 )
             }
@@ -193,6 +196,7 @@ def get_new_workflow_jobs():
                         "ios_arch": "arm64",
                         "ios_platform": "OS",
                         "op_list": "mobilenetv2.yaml",
+                        "context": "org-member",
                     }
                 )
             }
@@ -206,6 +210,7 @@ def get_new_workflow_jobs():
                         "ios_arch": "arm64",
                         "ios_platform": "OS",
                         "use_metal": quote("1"),
+                        "context": "org-member",
                     }
                 )
             }
