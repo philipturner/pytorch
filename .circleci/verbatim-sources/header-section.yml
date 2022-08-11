@@ -6,6 +6,8 @@
 # https://github.com/pytorch/pytorch/wiki/Docker-image-build-on-CircleCI
 
 version: 2.1
+orbs:
+  aws-s3: circleci/aws-s3@3.0
 
 parameters:
   run_binary_tests:

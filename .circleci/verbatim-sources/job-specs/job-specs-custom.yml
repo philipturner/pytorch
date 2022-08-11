@@ -116,7 +116,9 @@
     resource_class: medium
     environment:
       BUILD_ENVIRONMENT: << parameters.build-environment >>
+      AWS_REGION: us-east-1
     steps:
+
       - checkout
       - run_brew_for_macos_build
 
@@ -277,6 +279,27 @@
             python -m tools.stats.print_test_stats --upload-to-s3 --compare-with-s3 test
       - store_test_results:
           path: test/test-reports
+      - run:
+          name: rename test artifacts with job id
+          command: |
+            mkdir -p tmp/test-reports_${CIRCLE_BUILD_NUM}
+            cp test/test_reports tmp/test-reports_${CIRCLE_BUILD_NUM}
+      - persist_to_workspace:
+          root: /Users/distiller/project/
+          paths:
+            - tmp
+  upload_test_stats:
+    machine: # executor type
+      image: ubuntu-2004:202010-01
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/workspace
+      - run:
+          name: upload test stats to S3
+          command: |
+            cp ~/workspace .
+            python -m tools.stats.upload_test_stats_circleci --circle-workflow-id "${CIRCLE_WORKFLOW_JOB_ID}" --head-branch << pipeline.git.branch >>
 
 
   pytorch_macos_10_13_py3_test:

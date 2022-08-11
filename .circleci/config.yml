@@ -6,6 +6,8 @@
 # https://github.com/pytorch/pytorch/wiki/Docker-image-build-on-CircleCI
 
 version: 2.1
+orbs:
+  aws-s3: circleci/aws-s3@3.0
 
 parameters:
   run_binary_tests:
@@ -591,7 +593,9 @@ jobs:
     resource_class: medium
     environment:
       BUILD_ENVIRONMENT: << parameters.build-environment >>
+      AWS_REGION: us-east-1
     steps:
+
       - checkout
       - run_brew_for_macos_build
 
@@ -752,6 +756,27 @@ jobs:
             python -m tools.stats.print_test_stats --upload-to-s3 --compare-with-s3 test
       - store_test_results:
           path: test/test-reports
+      - run:
+          name: rename test artifacts with job id
+          command: |
+            mkdir -p tmp/test-reports_${CIRCLE_BUILD_NUM}
+            cp test/test_reports tmp/test-reports_${CIRCLE_BUILD_NUM}
+      - persist_to_workspace:
+          root: /Users/distiller/project/
+          paths:
+            - tmp
+  upload_test_stats:
+    machine: # executor type
+      image: ubuntu-2004:202010-01
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/workspace
+      - run:
+          name: upload test stats to S3
+          command: |
+            cp ~/workspace .
+            python -m tools.stats.upload_test_stats_circleci --circle-workflow-id "${CIRCLE_WORKFLOW_JOB_ID}" --head-branch << pipeline.git.branch >>
 
 
   pytorch_macos_10_13_py3_test:
@@ -1442,62 +1467,8 @@ workflows:
           num-test-shards: "2"
           requires:
             - macos-12-py3-x86-64-build
-      - mac_test:
-          name: macos-12-py3-x86-64-test-1-1-functorch
-          build-environment: macos-12-py3-x86-64
-          xcode-version: "13.3.1"
-          shard-number: "1"
-          num-test-shards: "1"
-          test-config: functorch
+      - upload_test_stats:
+          name: upload-test-stats
           requires:
-            - macos-12-py3-x86-64-build
-      - mac_build:
-          name: macos-12-py3-x86-64-lite-interpreter-build-test
-          build-environment: macos-12-py3-lite-interpreter-x86-64
-          xcode-version: "13.3.1"
-          build-generates-artifacts: false
-      - mac_build:
-          name: macos-12-py3-arm64-build
-          build-environment: macos-12-py3-arm64
-          xcode-version: "13.3.1"
-          python-version: "3.9.12"
-      - pytorch_ios_build:
-          name: ios-12-5-1-x86-64
-          build_environment: ios-12-5-1-x86-64
-          ios_arch: x86_64
-          ios_platform: SIMULATOR
-      - pytorch_ios_build:
-          name: ios-12-5-1-x86-64-coreml
-          build_environment: ios-12-5-1-x86-64-coreml
-          ios_arch: x86_64
-          ios_platform: SIMULATOR
-          use_coreml: "1"
-          context: org-member
-      - pytorch_ios_build:
-          name: ios-12-5-1-arm64
-          build_environment: ios-12-5-1-arm64
-          ios_arch: arm64
-          ios_platform: OS
-          context: org-member
-      - pytorch_ios_build:
-          name: ios-12-5-1-arm64-coreml
-          build_environment: ios-12-5-1-arm64-coreml
-          ios_arch: arm64
-          ios_platform: OS
-          use_coreml: "1"
-          context: org-member
-      - pytorch_ios_build:
-          name: ios-12-5-1-arm64-custom-ops
-          build_environment: ios-12-5-1-arm64-custom-ops
-          ios_arch: arm64
-          ios_platform: OS
-          op_list: mobilenetv2.yaml
-          context: org-member
-      - pytorch_ios_build:
-          name: ios-12-5-1-arm64-metal
-          build_environment: ios-12-5-1-arm64-metal
-          ios_arch: arm64
-          ios_platform: OS
-          use_metal: "1"
-          context: org-member
+            - macos-12-py3-x86-64-test-1-2-default
     when: << pipeline.parameters.run_build >>

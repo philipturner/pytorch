@@ -95,122 +95,132 @@ def get_new_workflow_jobs():
         #         )
         #     }
         # ),
+        # OrderedDict(
+        #     {
+        #         "mac_test": OrderedDict(
+        #             {
+        #                 "name": "macos-12-py3-x86-64-test-1-1-functorch",
+        #                 "build-environment": "macos-12-py3-x86-64",
+        #                 "xcode-version": quote("13.3.1"),
+        #                 "shard-number": quote("1"),
+        #                 "num-test-shards": quote("1"),
+        #                 "test-config": "functorch",
+        #                 "requires": ["macos-12-py3-x86-64-build"],
+        #             }
+        #         )
+        #     }
+        # ),
+        # OrderedDict(
+        #     {
+        #         "mac_build": OrderedDict(
+        #             {
+        #                 "name": "macos-12-py3-x86-64-lite-interpreter-build-test",
+        #                 "build-environment": "macos-12-py3-lite-interpreter-x86-64",
+        #                 "xcode-version": quote("13.3.1"),
+        #                 "build-generates-artifacts": "false",
+        #             }
+        #         )
+        #     }
+        # ),
+        # OrderedDict(
+        #     {
+        #         "mac_build": OrderedDict(
+        #             {
+        #                 "name": "macos-12-py3-arm64-build",
+        #                 "build-environment": "macos-12-py3-arm64",
+        #                 "xcode-version": quote("13.3.1"),
+        #                 "python-version": quote("3.9.12"),
+        #             }
+        #         )
+        #     }
+        # ),
+        # OrderedDict(
+        #     {
+        #         "pytorch_ios_build": OrderedDict(
+        #             {
+        #                 "name": "ios-12-5-1-x86-64",
+        #                 "build_environment": "ios-12-5-1-x86-64",
+        #                 "ios_arch": "x86_64",
+        #                 "ios_platform": "SIMULATOR",
+        #             }
+        #         )
+        #     }
+        # ),
+        # OrderedDict(
+        #     {
+        #         "pytorch_ios_build": OrderedDict(
+        #             {
+        #                 "name": "ios-12-5-1-x86-64-coreml",
+        #                 "build_environment": "ios-12-5-1-x86-64-coreml",
+        #                 "ios_arch": "x86_64",
+        #                 "ios_platform": "SIMULATOR",
+        #                 "use_coreml": quote("1"),
+        #                 "context": "org-member",
+        #             }
+        #         )
+        #     }
+        # ),
+        # OrderedDict(
+        #     {
+        #         "pytorch_ios_build": OrderedDict(
+        #             {
+        #                 "name": "ios-12-5-1-arm64",
+        #                 "build_environment": "ios-12-5-1-arm64",
+        #                 "ios_arch": "arm64",
+        #                 "ios_platform": "OS",
+        #                 "context": "org-member",
+        #             }
+        #         )
+        #     }
+        # ),
+        # OrderedDict(
+        #     {
+        #         "pytorch_ios_build": OrderedDict(
+        #             {
+        #                 "name": "ios-12-5-1-arm64-coreml",
+        #                 "build_environment": "ios-12-5-1-arm64-coreml",
+        #                 "ios_arch": "arm64",
+        #                 "ios_platform": "OS",
+        #                 "use_coreml": quote("1"),
+        #                 "context": "org-member",
+        #             }
+        #         )
+        #     }
+        # ),
+        # OrderedDict(
+        #     {
+        #         "pytorch_ios_build": OrderedDict(
+        #             {
+        #                 "name": "ios-12-5-1-arm64-custom-ops",
+        #                 "build_environment": "ios-12-5-1-arm64-custom-ops",
+        #                 "ios_arch": "arm64",
+        #                 "ios_platform": "OS",
+        #                 "op_list": "mobilenetv2.yaml",
+        #                 "context": "org-member",
+        #             }
+        #         )
+        #     }
+        # ),
+        # OrderedDict(
+        #     {
+        #         "pytorch_ios_build": OrderedDict(
+        #             {
+        #                 "name": "ios-12-5-1-arm64-metal",
+        #                 "build_environment": "ios-12-5-1-arm64-metal",
+        #                 "ios_arch": "arm64",
+        #                 "ios_platform": "OS",
+        #                 "use_metal": quote("1"),
+        #                 "context": "org-member",
+        #             }
+        #         )
+        #     }
+        # ),
         OrderedDict(
             {
-                "mac_test": OrderedDict(
+                "upload_test_stats": OrderedDict(
                     {
-                        "name": "macos-12-py3-x86-64-test-1-1-functorch",
-                        "build-environment": "macos-12-py3-x86-64",
-                        "xcode-version": quote("13.3.1"),
-                        "shard-number": quote("1"),
-                        "num-test-shards": quote("1"),
-                        "test-config": "functorch",
-                        "requires": ["macos-12-py3-x86-64-build"],
-                    }
-                )
-            }
-        ),
-        OrderedDict(
-            {
-                "mac_build": OrderedDict(
-                    {
-                        "name": "macos-12-py3-x86-64-lite-interpreter-build-test",
-                        "build-environment": "macos-12-py3-lite-interpreter-x86-64",
-                        "xcode-version": quote("13.3.1"),
-                        "build-generates-artifacts": "false",
-                    }
-                )
-            }
-        ),
-        OrderedDict(
-            {
-                "mac_build": OrderedDict(
-                    {
-                        "name": "macos-12-py3-arm64-build",
-                        "build-environment": "macos-12-py3-arm64",
-                        "xcode-version": quote("13.3.1"),
-                        "python-version": quote("3.9.12"),
-                    }
-                )
-            }
-        ),
-        OrderedDict(
-            {
-                "pytorch_ios_build": OrderedDict(
-                    {
-                        "name": "ios-12-5-1-x86-64",
-                        "build_environment": "ios-12-5-1-x86-64",
-                        "ios_arch": "x86_64",
-                        "ios_platform": "SIMULATOR",
-                    }
-                )
-            }
-        ),
-        OrderedDict(
-            {
-                "pytorch_ios_build": OrderedDict(
-                    {
-                        "name": "ios-12-5-1-x86-64-coreml",
-                        "build_environment": "ios-12-5-1-x86-64-coreml",
-                        "ios_arch": "x86_64",
-                        "ios_platform": "SIMULATOR",
-                        "use_coreml": quote("1"),
-                        "context": "org-member",
-                    }
-                )
-            }
-        ),
-        OrderedDict(
-            {
-                "pytorch_ios_build": OrderedDict(
-                    {
-                        "name": "ios-12-5-1-arm64",
-                        "build_environment": "ios-12-5-1-arm64",
-                        "ios_arch": "arm64",
-                        "ios_platform": "OS",
-                        "context": "org-member",
-                    }
-                )
-            }
-        ),
-        OrderedDict(
-            {
-                "pytorch_ios_build": OrderedDict(
-                    {
-                        "name": "ios-12-5-1-arm64-coreml",
-                        "build_environment": "ios-12-5-1-arm64-coreml",
-                        "ios_arch": "arm64",
-                        "ios_platform": "OS",
-                        "use_coreml": quote("1"),
-                        "context": "org-member",
-                    }
-                )
-            }
-        ),
-        OrderedDict(
-            {
-                "pytorch_ios_build": OrderedDict(
-                    {
-                        "name": "ios-12-5-1-arm64-custom-ops",
-                        "build_environment": "ios-12-5-1-arm64-custom-ops",
-                        "ios_arch": "arm64",
-                        "ios_platform": "OS",
-                        "op_list": "mobilenetv2.yaml",
-                        "context": "org-member",
-                    }
-                )
-            }
-        ),
-        OrderedDict(
-            {
-                "pytorch_ios_build": OrderedDict(
-                    {
-                        "name": "ios-12-5-1-arm64-metal",
-                        "build_environment": "ios-12-5-1-arm64-metal",
-                        "ios_arch": "arm64",
-                        "ios_platform": "OS",
-                        "use_metal": quote("1"),
-                        "context": "org-member",
+                        "name": "upload-test-stats",
+                        "requires": ["macos-12-py3-x86-64-test-1-2-default"],
                     }
                 )
             }
